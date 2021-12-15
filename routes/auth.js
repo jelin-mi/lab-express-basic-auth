@@ -8,14 +8,16 @@ const User = require('../models/User.model');
 const bcryptjs = require('bcryptjs');
 const saltRounds = 10;
 
+// require auth middleware
+const { isLoggedIn, isLoggedOut } = require('../middleware/route-guard.js');
 
 // SIGNUP
 
 // GET route ==> to display the signup form to users
-router.get('/signup', (req, res) => res.render('auth/signup'));
+router.get('/signup', isLoggedOut, (req, res) => res.render('auth/signup'));
 
 // POST route ==> to process form data
-router.post('/signup', (req, res, next) => {
+router.post('/signup', isLoggedOut, (req, res, next) => {
     // console.log('The form data: ', req.body);
 
     const { username, password } = req.body;
@@ -43,10 +45,10 @@ router.post('/signup', (req, res, next) => {
 // LOGIN
 
 // GET route ==> to display the login form to users
-router.get('/login', (req, res) => res.render('auth/login'));
+router.get('/login', isLoggedOut, (req, res) => res.render('auth/login'));
 
 // POST login route ==> to process form data
-router.post('/login', (req, res, next) => {
+router.post('/login', isLoggedOut, (req, res, next) => {
   console.log('SESSION =====> ', req.session);
 
   const { username, password } = req.body;
@@ -86,7 +88,7 @@ router.post('/login', (req, res, next) => {
 
 // LOGOUT
 
-router.post('/logout', (req, res, next) => {
+router.post('/logout', isLoggedIn, (req, res, next) => {
   req.session.destroy(err => {
     if (err) next(err);
     res.redirect('/');
@@ -94,7 +96,7 @@ router.post('/logout', (req, res, next) => {
 });
 
 // render the User's profile page
-router.get('/userProfile', (req, res) => {
+router.get('/userProfile', isLoggedIn, (req, res) => {
   res.render('users/user-profile', { userInSession: req.session.currentUser });
 });
 
